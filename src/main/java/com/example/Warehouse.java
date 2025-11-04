@@ -32,10 +32,17 @@ public class Warehouse {
 
     // Lägg till produkt
     public void addProduct(Product product) {
-        if (product == null)
-            throw new IllegalArgumentException("Product cannot be null.");
-        products.put(product.uuid(), product);
+    if (product == null)
+        throw new IllegalArgumentException("Product cannot be null.");
+
+    if (products.containsKey(product.uuid())) {
+        throw new IllegalArgumentException("Product with that id already exists, use updateProduct for updates.");
     }
+
+    products.put(product.uuid(), product);
+}
+
+
 
     // Hämta produkter som unmodifiable list
     public List<Product> getProducts() {
@@ -65,11 +72,13 @@ public class Warehouse {
     }
 
     // Returnera utgångna produkter
-    public List<Product> expiredProducts() {
-        return products.values().stream()
-                .filter(p -> p instanceof Perishable && ((Perishable) p).isExpired())
-                .collect(Collectors.toList());
-    }
+    public List<Perishable> expiredProducts() {
+    return products.values().stream()
+            .filter(p -> p instanceof Perishable perishable && perishable.isExpired())
+            .map(p -> (Perishable) p)
+            .collect(Collectors.toList());
+}
+
 
     // Returnera shippable produkter
     public List<Shippable> shippableProducts() {
@@ -84,5 +93,27 @@ public class Warehouse {
         products.remove(id);
         changedProducts.remove(id);
     }
+
+    public void clearProducts() {
+    products.clear();
+    changedProducts.clear();
+}
+
+public boolean isEmpty() {
+    return products.isEmpty();
+}
+
+public static Warehouse getInstance() {
+    return getInstance("Default");
+}
+
+public Map<Category, List<Product>> getProductsGroupedByCategories() {
+    return products.values().stream()
+            .collect(Collectors.groupingBy(Product::category));
+}
+
+
+
+
 }
 
